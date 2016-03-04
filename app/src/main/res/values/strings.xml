@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Android2DZ3</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="change_map_state">Map state</string>
+    <string name="landscape">Zoom</string>
+    <string name="move_next">Move</string>
+</resources>
