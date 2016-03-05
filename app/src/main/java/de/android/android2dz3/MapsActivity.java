@@ -85,15 +85,22 @@ public class MapsActivity extends FragmentActivity {
 
     private void listInit() {
         citiesMap.put("Paris", new LatLng(48.87146, 2.35500));
-        citiesMap.put("Lisboa", new LatLng(38.70908933, - 9.1557312));
-        citiesMap.put("Madrid", new LatLng(40.38839687, - 3.70513916));
+        citiesMap.put("Lisboa", new LatLng(38.70908933, -9.1557312));
+        citiesMap.put("Madrid", new LatLng(40.38839687, -3.70513916));
         citiesMap.put("Roma", new LatLng(41.88183137, 12.48939514));
-        citiesMap.put("London", new LatLng(51.4813829, - 0.12359619));
+        citiesMap.put("London", new LatLng(51.4813829, -0.12359619));
         citiesMap.put("Berlin", new LatLng(52.50869894, 13.40675354));
         citiesMap.put("Warszawa", new LatLng(52.21938689, 21.0017395));
-        citiesMap.put("Киев", new LatLng(50.40151532, 30.51452637));
-        citiesMap.put("Москва", new LatLng(55.73638916, 37.61993408));
+        citiesMap.put("Kiev", new LatLng(50.40151532, 30.51452637));
+        citiesMap.put("Athens", new LatLng(37.95719224, 23.73321533));
         citiesMap.put("Istanbul", new LatLng(41.00684811, 28.98090363));
+        citiesMap.put("Dublin", new LatLng(53.32759238, -6.26495361));
+        citiesMap.put("Oslo", new LatLng(59.89169258, 10.75836182));
+        citiesMap.put("Stockholm", new LatLng(59.31076796, 18.06976318));
+        citiesMap.put("Helsinki", new LatLng(60.15244221, 24.93621826));
+        citiesMap.put("Wien", new LatLng(48.18440113, 16.37786865));
+        citiesMap.put("Bucuresti", new LatLng(44.41024041, 26.09527588));
+        citiesMap.put("Rejkjavik", new LatLng(64.11300063, -21.81610107));
     }
 
     private void mapInit() {
