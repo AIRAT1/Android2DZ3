@@ -41,15 +41,35 @@ public class MapsActivity extends FragmentActivity {
     SupportMapFragment mapFragment;
     GoogleMap map;
     int mapState;
-    private String value;
     private float[] colors;
     private String selectedKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        changeLocale();
         setContentView(R.layout.activity_maps);
+        changeLocale();
+        startInit();
+        loadBundles(savedInstanceState);
+        setMapType();
+        mapSettings();
+        listInit();
+        colorsInit();
+        mapInit();
+    }
+
+    private void changeLocale() {
+        // смена локали для отображения названий стран на языке страны
+        String languageToLoad = "de_DE";
+        Locale locale = new Locale(languageToLoad);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        getBaseContext().getResources().updateConfiguration(config,
+                getBaseContext().getResources().getDisplayMetrics());
+    }
+
+    private void startInit() {
         btnTest = (Button) findViewById(R.id.btnTest);
         btnTest.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,33 +78,69 @@ public class MapsActivity extends FragmentActivity {
                 setMapType();
             }
         });
-
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         map = mapFragment.getMap();
+        if (map == null) {
+            finish();
+            return;
+        }
+    }
 
+    private void loadBundles(Bundle savedInstanceState) {
+        // если возможно - загрузка сохранённых параметров, либо старт со значением по умолчанию
         if (savedInstanceState != null) {
             mapState = savedInstanceState.getInt("mapState");
         }else {
             mapState = START_MAP_STATE_VALUE;
         }
-        setMapType();
+    }
 
-        if (map == null) {
-            finish();
-            return;
+    public void setMapType() {
+        // последовательная смена отображения карты (спутник->гибрид->схема)
+        if (mapState > 3) {
+            mapState = 1;
         }
-        mapSettings();
-        listInit();
-        colors = new float[] {BitmapDescriptorFactory.HUE_RED, BitmapDescriptorFactory.HUE_AZURE,
-                              BitmapDescriptorFactory.HUE_BLUE, BitmapDescriptorFactory.HUE_CYAN,
-                              BitmapDescriptorFactory.HUE_GREEN, BitmapDescriptorFactory.HUE_MAGENTA,
-                              BitmapDescriptorFactory.HUE_ORANGE, BitmapDescriptorFactory.HUE_ROSE,
-                              BitmapDescriptorFactory.HUE_VIOLET, BitmapDescriptorFactory.HUE_YELLOW};
-        mapInit();
+        switch (mapState) {
+            case 1:
+                map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                break;
+            case 2:
+                map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                break;
+            case 3:
+                map.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void mapSettings() {
+        // настройки отображения карты
+        UiSettings settings = map.getUiSettings();
+        // добавлены все жесты управления
+        settings.setAllGesturesEnabled(true);
+        // добавлен компас
+        settings.setCompassEnabled(true);
+        // добавлено определение моего положения
+        map.setMyLocationEnabled(true);
+        // добавлена кнопка для перехода на моё положение
+        settings.setMyLocationButtonEnabled(true);
+        // добавлено отображение этажей в здании (если есть)
+        map.setIndoorEnabled(true);
+        // добавлено 3D отображение зданий (если есть)
+        map.setBuildingsEnabled(true);
+        // добавлена возможность вращения карты
+        settings.setRotateGesturesEnabled(true);
+        // добавлены кнопки зума
+        settings.setZoomControlsEnabled(true);
+        // добавлена поддержка жестов зума
+        settings.setZoomGesturesEnabled(true);
     }
 
     private void listInit() {
+        // в мап добавляем названия европейских столиц и их координаты
         citiesMap.put("Paris", new LatLng(48.87146, 2.35500));
         citiesMap.put("Lisboa", new LatLng(38.70908933, -9.1557312));
         citiesMap.put("Madrid", new LatLng(40.38839687, -3.70513916));
@@ -104,7 +160,16 @@ public class MapsActivity extends FragmentActivity {
         citiesMap.put("Rejkjavik", new LatLng(64.11300063, -21.81610107));
     }
 
+    private void colorsInit() {
+        // создаём массив со всеми цветовыми значениями маркеров
+        colors = new float[] {BitmapDescriptorFactory.HUE_RED, BitmapDescriptorFactory.HUE_AZURE,
+                BitmapDescriptorFactory.HUE_BLUE, BitmapDescriptorFactory.HUE_CYAN,
+                BitmapDescriptorFactory.HUE_GREEN, BitmapDescriptorFactory.HUE_MAGENTA,
+                BitmapDescriptorFactory.HUE_ORANGE, BitmapDescriptorFactory.HUE_ROSE,
+                BitmapDescriptorFactory.HUE_VIOLET, BitmapDescriptorFactory.HUE_YELLOW};
+    }
     private void mapInit() {
+        // добавляем маркеры европейских столиц на карту
         for (Map.Entry<String, LatLng> entry : citiesMap.entrySet()) {
             map.addMarker(new MarkerOptions()
                             .position(entry.getValue())
@@ -112,14 +177,13 @@ public class MapsActivity extends FragmentActivity {
                             .icon(BitmapDescriptorFactory.defaultMarker(
                                     colors[new Random().nextInt(9)]
                             ))
-//            ).showInfoWindow();
             );
-            value = entry.getKey();
             Log.d(LOG, entry.getKey());
             Log.d(LOG, String.valueOf(entry.getValue()));
         }
 
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            // если клик по маркеру Париж - переход на страницу wikipedia
             @Override
             public boolean onMarkerClick(Marker marker) {
                 if (marker.getTitle().equals("Paris")) {
@@ -132,54 +196,15 @@ public class MapsActivity extends FragmentActivity {
             }
         });
     }
-
-    private void changeLocale() {
-        String languageToLoad = "de_DE";
-        Locale locale = new Locale(languageToLoad);
-        Locale.setDefault(locale);
-        Configuration config = new Configuration();
-        config.locale = locale;
-        getBaseContext().getResources().updateConfiguration(config,
-                getBaseContext().getResources().getDisplayMetrics());
-    }
-
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        // запись состояния отображения карты (схема, спутник, гибрид)
         outState.putInt("mapState", mapState);
         super.onSaveInstanceState(outState);
     }
-    private void mapSettings() {
-        UiSettings settings = map.getUiSettings();
-        settings.setAllGesturesEnabled(true);
-        settings.setCompassEnabled(true);
-        map.setMyLocationEnabled(true);
-        settings.setMyLocationButtonEnabled(true);
-        map.setIndoorEnabled(true);
-        map.setBuildingsEnabled(true);
-        settings.setRotateGesturesEnabled(true);
-        settings.setZoomControlsEnabled(true);
-        settings.setZoomGesturesEnabled(true);
-    }
-    public void setMapType() {
-        if (mapState > 3) {
-            mapState = 1;
-        }
-        switch (mapState) {
-            case 1:
-                map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-                break;
-            case 2:
-                map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-                break;
-            case 3:
-                map.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-                break;
-            default:
-                break;
-        }
-    }
 
     public void onChangeLandscape(View view) {
+        //  программное изменение масштаба
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Landscape")
 //                .setMessage("Enter integer value between 2 and 20");
@@ -200,6 +225,7 @@ public class MapsActivity extends FragmentActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
         spinner.setLayoutParams(lp);
+        // используемые значения хранятся в файле ресурсов
         ArrayAdapter<?> adapter = ArrayAdapter.createFromResource(this, R.array.spinners,
                 android.R.layout.simple_spinner_dropdown_item);
         spinner.setBackgroundColor(Color.GREEN);
@@ -229,23 +255,28 @@ public class MapsActivity extends FragmentActivity {
     }
 
     public void onMoveNext(View view) {
+        // сщздаётся и наполняется лист со всеми координатами городов
         List<LatLng> coordinates = new ArrayList(citiesMap.size());
         for (LatLng value : citiesMap.values()) {
             coordinates.add(value);
         }
+        // случайно выбирается следующее значение
         int selectedValue = new Random().nextInt(citiesMap.size());
 
+        // у выбранного значения считывается ключ
         for (Map.Entry<String, LatLng> map : citiesMap.entrySet()) {
             if (map.getValue().equals(coordinates.get(selectedValue))) {
                 selectedKey = map.getKey();
             }
         }
 
+        // переход на выбранные координаты
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(coordinates.get(
                selectedValue ), 5f);
         map.animateCamera(cameraUpdate, 2000, new GoogleMap.CancelableCallback() {
             @Override
             public void onFinish() {
+                // выводится текст ключа - название города
                 Toast.makeText(MapsActivity.this, "We are now in " + selectedKey, Toast.LENGTH_SHORT).show();
             }
             @Override
