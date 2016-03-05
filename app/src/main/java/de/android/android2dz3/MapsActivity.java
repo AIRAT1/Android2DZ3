@@ -4,15 +4,16 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -181,15 +182,30 @@ public class MapsActivity extends FragmentActivity {
     public void onChangeLandscape(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Landscape")
-                .setMessage("Enter integer value between 2 and 20");
-        final EditText editText = new EditText(MapsActivity.this);
+//                .setMessage("Enter integer value between 2 and 20");
+                .setMessage("Tap on value to select new landscape");
+
+
+//        final EditText editText = new EditText(MapsActivity.this);
+//        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+//                LinearLayout.LayoutParams.MATCH_PARENT,
+//                LinearLayout.LayoutParams.MATCH_PARENT);
+//        editText.setLayoutParams(lp);
+//        editText.setEms(2);
+//        editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+//        builder.setView(editText);
+
+        final Spinner spinner = new Spinner(MapsActivity.this);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
-        editText.setLayoutParams(lp);
-        editText.setEms(2);
-        editText.setInputType(InputType.TYPE_CLASS_NUMBER);
-        builder.setView(editText);
+        spinner.setLayoutParams(lp);
+        ArrayAdapter<?> adapter = ArrayAdapter.createFromResource(this, R.array.spinners,
+                android.R.layout.simple_spinner_dropdown_item);
+        spinner.setBackgroundColor(Color.GREEN);
+        spinner.setAdapter(adapter);
+        builder.setView(spinner);
+
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int i) {
@@ -200,7 +216,8 @@ public class MapsActivity extends FragmentActivity {
             @Override
              public void onClick(DialogInterface dialogInterface, int i) {
                 try {
-                    float landscapeValue = Float.parseFloat(editText.getText().toString());
+//                    float landscapeValue = Float.parseFloat(editText.getText().toString());
+                    float landscapeValue = Float.parseFloat(spinner.getSelectedItem().toString());
                     if (landscapeValue >= 2 && landscapeValue < 21) {
                         map.moveCamera(CameraUpdateFactory.zoomTo(landscapeValue));
                     }
