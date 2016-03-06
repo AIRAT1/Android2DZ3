@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -26,6 +28,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -140,6 +143,39 @@ public class MapsActivity extends FragmentActivity {
     }
 
     private void listInit() {
+        // получение координат по имени города
+        Geocoder gc = new Geocoder(MapsActivity.this);
+        if (gc.isPresent()) {
+            List<Address> list = null;
+            try {
+                list = gc.getFromLocationName("Moscow", 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Address address = list.get(0);
+            double lat = address.getLatitude();
+            double lng = address.getLongitude();
+            citiesMap.put("Moscow", new LatLng(lat, lng));
+        }
+        // получение названия местности по координатам
+        Geocoder gc1 = new Geocoder(MapsActivity.this);
+        if (gc1.isPresent()) {
+            List<Address> list1 = null;
+            try {
+                list1 = gc1.getFromLocation(-33.8666, 151.1958, 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Address address1 = list1.get(0);
+            StringBuilder sb = new StringBuilder();
+            sb.append("Name: " + address1.getLocality() + "\n");
+            sb.append("Sub-Admin Ares: " + address1.getSubAdminArea() + "\n");
+            sb.append("Admin Area: " + address1.getAdminArea() + "\n");
+            sb.append("Country: " + address1.getCountryName() + "\n");
+            sb.append("Country Code: " + address1.getCountryCode());
+            String strAddress = sb.toString();
+            citiesMap.put(strAddress, new LatLng(address1.getLatitude(), address1.getLongitude()));
+        }
         // в мап добавляем названия европейских столиц и их координаты
         citiesMap.put("Paris", new LatLng(48.87146, 2.35500));
         citiesMap.put("Lisboa", new LatLng(38.70908933, -9.1557312));
